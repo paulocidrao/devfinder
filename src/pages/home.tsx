@@ -15,8 +15,11 @@ import {
   UserHeader,
 } from "./styled";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../lib/axios/api";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface IGetUserGithub {
   avatar_url: string;
@@ -29,6 +32,8 @@ interface IGetUserGithub {
   location: string;
   blog: string;
   company: string;
+  twitter_username: string;
+  created_at: string;
 }
 
 export const Home = () => {
@@ -39,15 +44,26 @@ export const Home = () => {
     setUserName(e.target.value.trim());
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get("octocat");
+        setResponseData(response.data);
+      } catch {
+        toast.error("Falha ao pesquisar o usuário, tente novamente!");
+      }
+    };
+    fetchData();
+  }, []);
+
   const getUserGitHub = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await api.get(username);
       setResponseData(response.data);
-      console.log(response.data.company);
       setUserName("");
     } catch {
-      console.error("Erro ao buscar usuário:", error);
+      toast.error("Falha ao pesquisar o usuário, tente novamente!");
     }
   };
 
@@ -67,37 +83,83 @@ export const Home = () => {
         </SearchUser>
       </Content>
       <UserContent>
-        <img src={responseData?.avatar_url} alt="avatar do github" />
+        {responseData?.avatar_url && (
+          <img src={responseData?.avatar_url} alt="avatar do github" />
+        )}
         <div>
-          <UserHeader>
-            <p>{responseData?.name}</p>
-            <span>@{responseData?.login}</span>
-            <span>Entrou em 2022</span>
-            {responseData?.bio ? (
-              <>
-                <p>{responseData?.bio}</p>
-              </>
-            ) : (
-              <p>Nenhuma bio disponível</p>
-            )}
-          </UserHeader>
+          {responseData && (
+            <UserHeader>
+              {responseData?.name && <p>{responseData?.name}</p>}
+              {responseData?.login && <span>@{responseData?.login}</span>}
+              <span>
+                {formatDistanceToNow(responseData.created_at, {
+                  locale: ptBR,
+                  addSuffix: true,
+                })}
+              </span>
+              {responseData?.bio ? (
+                <>
+                  <p>{responseData?.bio}</p>
+                </>
+              ) : (
+                <p>Bio não disponível</p>
+              )}
+            </UserHeader>
+          )}
           <GitInfo>
             <p>Repos</p>
             <span>{responseData?.public_repos}</span>
             <p>Seguidores</p>
             <span>{responseData?.followers}</span>
-            <p>seguindo</p>
+            <p>Seguindo</p>
             <span>{responseData?.following}</span>
           </GitInfo>
           <SocialLinks>
             <MapPin size={32} />
-            <p>{responseData?.location}</p>
+            {responseData?.location ? (
+              <>
+                <p>{responseData?.location}</p>
+              </>
+            ) : (
+              <>
+                <span>Não disponivel</span>
+              </>
+            )}
+
             <Link size={32} />
-            <a href={responseData?.blog}>blog</a>
+            {responseData?.blog ? (
+              <>
+                <a href={responseData?.blog}>{responseData?.blog}</a>
+              </>
+            ) : (
+              <>
+                <span>Não disponivel</span>
+              </>
+            )}
+
             <XLogo size={32} />
-            <a href="">Not avialable</a>
+            {responseData?.twitter_username ? (
+              <>
+                <a href={`https://x.com/${responseData.twitter_username}`}>
+                  {responseData.twitter_username}
+                </a>
+              </>
+            ) : (
+              <>
+                <span>Não disponivel</span>
+              </>
+            )}
             <BuildingOffice size={32} />
-            <p>{responseData?.company}</p>
+
+            {responseData?.company ? (
+              <>
+                <p>{responseData?.company}</p>
+              </>
+            ) : (
+              <>
+                <p>Não disponivel</p>
+              </>
+            )}
           </SocialLinks>
         </div>
       </UserContent>

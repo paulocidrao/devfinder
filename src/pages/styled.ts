@@ -125,12 +125,17 @@ export const SocialLinks = styled.footer`
     grid-template-columns:40px 1fr 40px 1fr;
     grid-template-rows:repeat(4,auto);
     gap: 10px 20px;
-    align-items:center
-    p,a{
+    align-items:center;
+    justify-content:center;
+    p,a,span{
       margin:0;
-
+      text-decoration:none;
+      color: ${props => props.theme.colors["white"]};
     }
     svg{
        margin-right: 10px;
+    }
+    a{
+      max-width:10ch
     }
 `;
