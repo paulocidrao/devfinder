@@ -11,6 +11,7 @@ const themeDefault = {
     tablet: "(max-width:744px)",
     desktop: "(max-width:1054px)",
     desktopMax: "(max-width:1920px)",
+    phone: "(max-width:450px)"
   }
 }
 
